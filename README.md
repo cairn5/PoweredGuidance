@@ -5,7 +5,7 @@ Guidance for [Kitten Space Agency](https://ahwoo.com/app/100000/kitten-space-age
 
 ## Unified Powered Flight Guidance
 
-![UPFG Launch](docs/images/g-fold-traj.png)
+![UPFG Launch](docs/images/upfg-launch.png)
 
 The UPFG program is the program that was used to guide the space shuttle to it's desired orbit, as well as providing
 capability for other orbital manoeuvres. The implementation of mode 1 (standard ascent) is explained extremely well
@@ -19,7 +19,7 @@ https://youtu.be/oTMbm27fYgk
 
 ## G-FOLD and Lossless Convexification
 
-![G-FOLD Landing](docs/images/upfg-launch.png)
+![G-FOLD Landing](docs/images/g-fold-traj.png)
 
 For the terminal landing, we use JPL's G-FOLD Algorithm developed by Blackmore et al. http://larsblackmore.com/iee_tcst13.pdf
 
