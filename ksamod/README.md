@@ -1,10 +1,10 @@
-# Powered Guidance KSA mod
+# PoweredGuidance KSA mod
 
 A Kitten Space Agency (KSA) mod that draws an ImGui window in-game and drives the
 flight computer. Includes a standalone port of UPFG (Unified Powered Flight Guidance)
 for ascent and a convex G-FOLD powered-descent solver for landing.
 
-Loaded by the [StarMap](https://github.com/StarMapLoader/StarMap) mod loader.
+Requires the [StarMap](https://github.com/StarMapLoader/StarMap) mod loader.
 
 ## How it works
 
@@ -45,9 +45,3 @@ prompts to enable it (or add it to `manifest.toml`).
 
 The solution also contains `tools/convtest` — a console app that verifies the
 steering→Euler attitude conversion round-trips through KSA's own quaternion functions.
-
-## Run
-
-Launch KSA normally — StarMap loads Powered Guidance from the mods folder. From Rider, the
-**KSA (StarMap loads Powered Guidance from mods folder)** run profile starts the game. Look for
-`[PG]` lines on stdout and the "Powered Guidance" window in-game.

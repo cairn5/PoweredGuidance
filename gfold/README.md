@@ -27,25 +27,6 @@ the mod project.
 - `python_ref/` — CVXPY/Clarabel replica of the original Python for
   cross-validation (`gfold_ref.py [tf] [N] [--scaled] [--feascheck csv]`).
 
-## Validation status (tf=81 s, N=120, Example-1 params)
-
-P4 (min fuel, unique optimum) agrees between C#/ECOS and Python/CVXPY/
-Clarabel to max |dr| 0.5 mm, |dv| 0.7 mm/s, |dm| 0.8 g over the trajectory;
-both use 377.34 kg. P3 paths differ mid-trajectory (its objective only
-prices the landing point, so the path is non-unique) but both land with
-~zero error.
-
-Hard-won numerics lesson: in raw SI units BOTH solvers fail on this problem
-— ECOS loudly ("unreliable search direction", ~1.5% suboptimal), Clarabel
-silently (returns "Solved" with a false optimality certificate, 383.6 kg).
-GfoldPlanner therefore nondimensionalizes internally (length ~ |r0|, time
-sqrt(L/g)) and unscales results; the Python replica has --scaled for parity.
-
-Known formulation gap inherited from the reference: no m(tf) >= m_dry
-constraint, so the optimizer may burn more fuel than is aboard (the console
-flags it). Add the fuel floor before real use. Also note the reference
-repo's own static config (N=250, dt=4.5 -> tf 1120 s) exceeds its fuel
-limit tf_max = 125 s; use a feasible tf.
 
 ## Build notes
 
