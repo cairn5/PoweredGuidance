@@ -1,0 +1,82 @@
+{
+  "Target": {
+    "type": "surface",
+    "parameters": {
+      "latitude": 28.5,
+      "longitude": -70.0
+    }
+  },
+  "Simulator": {
+    "speed": 50,
+    "dtsim": 0.2,
+    "startLat" : 28.5,
+    "startLong" : -70,
+    "startGround" : 1,
+    "airVel" : 2400,
+    "airFpa" : 55,
+    "altitude" : 45,
+    "heading" : 45,
+    "historylength": 700,
+    "Body": "Earth"
+  },
+  "Guidance": {
+    "program": "dynamic",
+    "dtguidance": 0.8,
+    "programConfig": {
+      "sequence": ["Prelaunch", "Ascent", "PoweredGuidance", "FinalBurn", "Idle"],
+      "modes": {
+        "Prelaunch": {
+          "type": "PreLaunchMode",
+          "config": {
+            "Duration": 0.1
+          }
+        },
+        "Ascent": {
+          "type": "GravityTurnMode", 
+          "config": {
+            "AltitudeThreshold": 30000.0,
+            "PitchAngle": 2.3,
+            "PitchTime": 12.2
+          }
+        },
+        "PoweredGuidance": {
+          "type": "UpfgMode",
+          "config": {
+            "ModeKey": 2,
+            "CutoffTime": 2.0
+          }
+        },
+        "FinalBurn": {
+          "type": "FinalMode",
+          "config": {
+            "BurnTime": 2.0
+          }
+        },
+        "Idle": {
+          "type": "IdleMode",
+          "config": {}
+        }
+      }
+    }
+  },
+  "StageList": [
+    {
+      "Id": 1,
+      "Mode": 1,
+      "GLim": 100,
+      "MassTotal": 150000,
+      "MassDry": 15000,
+      "Thrust": 1500000,
+      "Isp": 280
+    },
+    {
+      "Id": 2,
+      "Mode": 1,
+      "GLim": 100,
+      "MassTotal": 50000,
+      "MassDry": 8000,
+      "Thrust": 450000,
+      "Isp": 340
+    }
+  ]
+}

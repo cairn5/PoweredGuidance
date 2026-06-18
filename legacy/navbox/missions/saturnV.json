@@ -1,0 +1,107 @@
+{
+  "Target": {
+    "type": "orbital",
+    "parameters": {
+      "pe": 175,
+      "ap": 175,
+      "inc": 56.5
+    }
+  },
+  "Orbit": {
+    "pe": 175,
+    "ap": 175,
+    "inc": 56.5
+  },
+  "Simulator": {
+    "speed": 50,
+    "dtsim": 0.2,
+    "startLat" : 28.5,
+    "startLong" : -70,
+    "startGround" : 1,
+    "airVel" : 2400,
+    "airFpa" : 55,
+    "altitude" : 45,
+    "heading" : 45,
+    "historylength": 700,
+    "Body": "Earth"
+  },
+  "Guidance": {
+    "program": "dynamic",
+    "dtguidance": 0.8,
+    "programConfig": {
+      "sequence": ["Prelaunch", "Ascent", "PoweredGuidance", "FinalBurn", "Idle"],
+      "modes": {
+        "Prelaunch": {
+          "type": "PreLaunchMode",
+          "config": {
+            "Duration": 0.1
+          }
+        },
+        "Ascent": {
+          "type": "GravityTurnMode", 
+          "config": {
+            "AltitudeThreshold": 30000.0,
+            "PitchAngle": 2.3,
+            "PitchTime": 12.2
+          }
+        },
+        "PoweredGuidance": {
+          "type": "UpfgMode",
+          "config": {
+            "ModeKey": 1,
+            "CutoffTime": 2.0
+            
+          }
+        },
+        "FinalBurn": {
+          "type": "FinalMode",
+          "config": {
+            "BurnTime": 2.0
+          }
+        },
+        "Idle": {
+          "type": "IdleMode",
+          "config": {}
+        }
+      }
+    }
+  },
+  "StageList": [
+    {
+      "Id": 1,
+      "Mode": 1,
+      "GLim": 100,
+      "MassTotal": 2804500,
+      "MassDry": 727500,
+      "Thrust": 33000e3,
+      "Isp": 263
+    },
+    {
+      "Id": 2,
+      "Mode": 1,
+      "GLim": 100,
+      "MassTotal": 590500,
+      "MassDry": 163500,
+      "Thrust": 4400e3,
+      "Isp": 421
+    },
+    {
+      "Id": 3,
+      "Mode": 1,
+      "GLim": 100,
+      "MassTotal": 120500,
+      "MassDry": 15200,
+      "Thrust": 1000e3,
+      "Isp": 421
+    },
+    {
+      "Id": 4,
+      "Mode": 1,
+      "GLim": 100,
+      "MassTotal": 10000,
+      "MassDry": 5000,
+      "Thrust": 91e3,
+      "Isp": 314.5
+    }
+  ]
+}

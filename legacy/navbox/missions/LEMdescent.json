@@ -1,0 +1,58 @@
+{
+  "Target": {
+    "type": "surface",
+    "parameters": {
+      "latitude": 0,
+      "longitude": 30
+    }
+  },
+  "Simulator": {
+    "speed": 50,
+    "dtsim": 0.1,
+    "startLat" : 0,
+    "startLong" : 0,
+    "startGround" : 0,
+    "airVel" : 1652,
+    "airFpa" : 0,
+    "altitude" : 60,
+    "heading" : 90,
+    "historylength": 1000,
+    "Body": "Moon"
+  },
+  "Guidance": {
+    "program": "dynamic",
+    "dtguidance": 0.2,
+    "programConfig": {
+      "sequence": ["PoweredGuidance"],
+      "modes": {
+        "PoweredGuidance": {
+          "type": "UpfgMode",
+          "config": {
+            "ModeKey": 2,
+            "CutoffTime": 1.0
+          }
+        }
+      }
+    }
+  },
+  "StageList": [
+    {
+      "Id": 1,
+      "Mode": 1,
+      "GLim": 100,
+      "MassTotal": 10334,
+      "MassDry": 4900,
+      "Thrust": 45040,
+      "Isp": 311
+    },
+    {
+      "Id": 2,
+      "Mode": 1,
+      "GLim": 100,
+      "MassTotal": 4700,
+      "MassDry": 2150,
+      "Thrust": 16000,
+      "Isp": 311
+    }
+  ]
+}

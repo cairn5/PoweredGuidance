@@ -1,0 +1,31 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+
+# Test / coverage output
+[Tt]est[Rr]esults/
+CoverageReport/
+*.cobertura.xml
+
+# IDE / editor state
+.idea/
+.vs/
+*.user
+*.suo
+*.DotSettings.user
+*.userprefs
+
+# Local Claude / agent settings (never publish)
+.claude/
+
+# Native build output (rebuilt by gfold/build-ecos.ps1 from gfold/ecos/)
+gfold/native/
+
+# Generated solver output
+gfold/gfold_*.csv
+gfold/python_ref/*.csv
+
+# Python virtualenv / cache (gfold/python_ref)
+gfold/python_ref/.venv/
+__pycache__/
+*.pyc

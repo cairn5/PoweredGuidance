@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Gfold</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The native solver travels with the managed library: anything that
+         references Gfold.Core gets ecos.dll in its output directory, and the
+         DllImport resolver loads it from next to Gfold.Core.dll. -->
+    <None Include="..\native\ecos.dll" Link="ecos.dll" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

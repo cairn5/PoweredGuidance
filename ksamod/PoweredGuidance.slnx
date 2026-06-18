@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../tools/convtest/convtest.csproj" />
+  <Project Path="PoweredGuidance.csproj" />
+</Solution>

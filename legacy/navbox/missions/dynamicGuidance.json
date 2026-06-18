@@ -1,0 +1,70 @@
+{
+  "Orbit": {
+    "mode": 1,
+    "pe": 300,
+    "ap": 300,
+    "alt": 300,
+    "inc": 56.5
+  },
+  "Simulator": {
+    "speed": 30,
+    "dtsim": 0.1,
+    "startLat": 28.5,
+    "startLong": -70,
+    "startGround": 0,
+    "airVel": 2400,
+    "airFpa": 55,
+    "altitude": 45,
+    "heading": 40,
+    "historylength": 400
+  },
+  "Guidance": {
+    "program": "dynamic",
+    "dtguidance": 0.2,
+    "programConfig": {
+      "sequence": ["Prelaunch", "Ascent", "PoweredGuidance", "FinalBurn", "Idle"],
+      "modes": {
+        "Prelaunch": {
+          "type": "PreLaunchMode",
+          "config": {
+            "Duration": 0.1
+          }
+        },
+        "Ascent": {
+          "type": "GravityTurnMode", 
+          "config": {
+            "AltitudeThreshold": 30000.0
+          }
+        },
+        "PoweredGuidance": {
+          "type": "UpfgMode",
+          "config": {
+            "ModeKey": 2,
+            "ConvergenceThreshold": 5.0
+          }
+        },
+        "FinalBurn": {
+          "type": "FinalMode",
+          "config": {
+            "BurnTime": 8.0
+          }
+        },
+        "Idle": {
+          "type": "IdleMode",
+          "config": {}
+        }
+      }
+    }
+  },
+  "StageList": [
+    {
+      "Id": 1,
+      "Mode": 1,
+      "GLim": 3,
+      "MassTotal": 420000,
+      "MassDry": 70000,
+      "Thrust": 4837000,
+      "Isp": 452
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "Target": {
+    "type": "orbital",
+    "parameters": {
+      "pe": 100,
+      "ap": 100,
+      "inc": 50
+    }
+  },
+  "Orbit": {
+    "pe": 100,
+    "ap": 100,
+    "inc": 50
+  },
+  "Simulator": {
+    "speed": 50,
+    "dtsim": 0.05,
+    "startLat" : 30,
+    "startLong" : 23.47,
+    "startGround" : 1,
+    "airVel" : 0,
+    "airFpa" : 90,
+    "altitude" : 0,
+    "heading" : 90,
+    "historylength": 700,
+    "Body": "Moon"
+  },
+  "Guidance": {
+    "program": "dynamic",
+    "dtguidance": 0.2,
+    "programConfig": {
+      "sequence": ["Prelaunch", "Ascent", "PoweredGuidance", "FinalBurn", "Idle"],
+      "modes": {
+        "Prelaunch": {
+          "type": "PreLaunchMode",
+          "config": {
+            "Duration": 0.1
+          }
+        },
+        "Ascent": {
+          "type": "GravityTurnMode", 
+          "config": {
+            "AltitudeThreshold": 100,
+            "PitchAngle": 45,
+            "PitchTime": 5
+          }
+        },
+        "PoweredGuidance": {
+          "type": "UpfgMode",
+          "config": {
+            "ModeKey": 1,
+            "CutoffTime": 5.0
+            
+          }
+        },
+        "FinalBurn": {
+          "type": "FinalMode",
+          "config": {
+            "BurnTime": 5.0
+          }
+        },
+        "Idle": {
+          "type": "IdleMode",
+          "config": {}
+        }
+      }
+    }
+  },
+  "StageList": [
+    {
+      "Id": 1,
+      "Mode": 1,
+      "GLim": 100,
+      "MassTotal": 4700,
+      "MassDry": 2150,
+      "Thrust": 16000,
+      "Isp": 311
+    }
+  ]
+}
