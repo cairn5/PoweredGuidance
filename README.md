@@ -35,7 +35,7 @@ rcs for pointing, rather than the large default rocket with a large coupling bet
 ## Installation
 
 1. Install [StarMap](https://github.com/StarMapLoader/StarMap).
-2. Download the latest release from the [Releases](https://github.com/Maximilian-Nesslauer/KSA-AdvancedFlightComputer/releases) tab.
+2. Download the latest release from the [Releases](https://github.com/cairn5/PoweredGuidance/releases) tab.
 3. Extract into `Documents\My Games\Kitten Space Agency\mods\PoweredGuidance\`.
 4. The game auto-discovers new mods and prompts you to enable them. Alternatively, add to `Documents\My Games\Kitten Space Agency\manifest.toml`:
 
