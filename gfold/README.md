@@ -42,7 +42,7 @@ method can never get stuck in a false local minimum. An SOCP is the special case
 assembled from only these ingredients:
 
 - **Objective** — linear, $f^\top x$. (A convex objective is made linear by the
-  epigraph trick: $\min\, t$ subject to $f(x) \le t$ — exactly how P3 handles its
+  epigraph trick: $\min  t$ subject to $f(x) \le t$ — exactly how P3 handles its
   norm objective.)
 - **Equality constraints** — must be **affine**, $Fx = g$. A nonlinear equality is
   never allowed: it traces a curved surface, not a solid convex region. (This is
@@ -89,7 +89,7 @@ why it is plain *linear*, not a cone.
 | $\sigma$ | thrust-magnitude slack, $\lVert \mathbf{u} \rVert \le \sigma$; equals $\Gamma / m$ |
 | $t$ | P3 landing-error epigraph variable |
 | $\mathbf{g}$ | constant gravity vector |
-| $\alpha = 1/(I_{sp}\, g_0)$ | mass-flow (fuel-consumption) rate |
+| $\alpha = 1/(I_{sp}  g_0)$ | mass-flow (fuel-consumption) rate |
 | $\rho_1, \rho_2$ | min / max thrust (force) bounds |
 | $\Gamma$ | thrust-magnitude slack in force units (paper's variable; $\sigma = \Gamma/m$) |
 | $\theta$ | max thrust pointing angle from vertical |
@@ -111,7 +111,7 @@ Its derivative is the translational equation of motion, with thrust
 acceleration $\mathbf{T}_c / m$ and gravity $\mathbf{g}$ as inputs:
 
 $$
-\dot{\mathbf{x}} = A(\omega) \mathbf{x} + B \left( \mathbf{g} + \frac{\mathbf{T}_c}{m} \right)
+\dot{\mathbf{x}} = A(\omega) \mathbf{x} + B ( \mathbf{g} + \frac{\mathbf{T}_c}{m} )
 $$
 
 $$
@@ -124,7 +124,8 @@ Here $S(\omega)$ is the skew-symmetric cross-product matrix of the planet's
 angular velocity $\omega$, so $-S(\omega)^2 \mathbf{r}$ is the centripetal and
 $-2 S(\omega) \mathbf{v}$ the Coriolis term. This implementation takes
 $\omega = 0$ (non-rotating frame), reducing $A$ to the double integrator
-$\left[ \begin{smallmatrix} 0 & I \\ 0 & 0 \end{smallmatrix} \right]$.
+
+$$A(0) = \begin{bmatrix} 0 & I \\ 0 & 0 \end{bmatrix}.$$
 
 ### Convexification
 
@@ -158,14 +159,14 @@ gives $\rho_1 e^{-z} \le \sigma \le \rho_2 e^{-z}$. The upper bound is
 per-node point $z_{0,n}$:
 
 $$
-\sigma_n \le \mu_{2,n}\,(1 - (z_n - z_{0,n})), \qquad \mu_{2,n} = \rho_2 e^{-z_{0,n}} .
+\sigma_n \le \mu_{2,n} (1 - (z_n - z_{0,n})), \qquad \mu_{2,n} = \rho_2 e^{-z_{0,n}} .
 $$
 
 The expansion point is the **minimum possible mass at node $n$** — the lightest
 the vehicle can be is full-throttle burn since launch:
 
 $$
-z_{0,n} = \ln\!\left( m_\text{wet} - \alpha \rho_2 \, t_n \right), \qquad t_n = n\,\Delta t .
+z_{0,n} = \ln( m_\text{wet} - \alpha \rho_2   t_n ), \qquad t_n = n \Delta t .
 $$
 
 $e^{-z}$ is convex (its second derivative $\tfrac{d^2}{dz^2} e^{-z} = e^{-z} > 0$
@@ -209,11 +210,11 @@ $$
 \textbf{P4 (min fuel):} \quad \max \; z_{N-1}
 $$
 
-The classic G-FOLD objective is written $\min \int_0^{t_f} \Gamma\, dt$ (minimize
+The classic G-FOLD objective is written $\min \int_0^{t_f} \Gamma  dt$ (minimize
 integrated thrust = fuel). The code does **not** optimize that integral directly;
 it maximizes the final log-mass $z_{N-1}$, which is **equivalent**: fuel burned is
 $m_\text{wet} - e^{z_{N-1}}$, so maximizing $z_{N-1}$ minimizes fuel, and fuel
-$= \alpha \int_0^{t_f} \Gamma\, dt$. P3's norm objective is made linear with the
+$= \alpha \int_0^{t_f} \Gamma  dt$. P3's norm objective is made linear with the
 epigraph variable $t$ ($\lVert \mathbf{r}_{N-1} - \mathbf{r}_f \rVert \le t$,
 minimize $t$).
 
@@ -231,11 +232,11 @@ dynamics that link one node to another.
 | Terminal velocity | $\mathbf{v}_{N-1} = \mathbf{v}_f$ | Arrive at the target touchdown velocity $\mathbf{v}_f$ |
 | Initial mass | $z_0 = \ln m_\text{wet}$ | Log-mass begins at the wet mass |
 | Terminal position | $r_{x,N-1} = r_{f,x}$ (P3); $\quad \mathbf{r}_{N-1} = \mathbf{r}_f$ (P4) | P3 pins altitude only (floats the landing point); P4 pins the full point |
-| Endpoint thrust direction | $\mathbf{u}_0 = \sigma_0\,\hat{\mathbf{e}}, \quad \mathbf{u}_{N-1} = \sigma_{N-1}\,\hat{\mathbf{e}}, \quad \hat{\mathbf{e}} = (1,0,0)$ | Thrust vertical at the endpoints (initial dropped in free-initial-thrust mode) |
+| Endpoint thrust direction | $\mathbf{u}_0 = \sigma_0 \hat{\mathbf{e}}, \quad \mathbf{u}_{N-1} = \sigma_{N-1} \hat{\mathbf{e}}, \quad \hat{\mathbf{e}} = (1,0,0)$ | Thrust vertical at the endpoints (initial dropped in free-initial-thrust mode) |
 | Terminal thrust slack | $\sigma_{N-1} = 0$ | Thrust magnitude goes to zero at touchdown |
-| Velocity dynamics | $\mathbf{v}_{n+1} = \mathbf{v}_n + \tfrac{1}{2}(\mathbf{a}_n + \mathbf{a}_{n+1})\,\Delta t, \quad \mathbf{a} = \mathbf{u} + \mathbf{g}$ | Trapezoidal link for $\mathbf{v}$ (thrust accel + gravity) |
-| Position dynamics | $\mathbf{r}_{n+1} = \mathbf{r}_n + \tfrac{1}{2}(\mathbf{v}_n + \mathbf{v}_{n+1})\,\Delta t$ | Trapezoidal integral of $\mathbf{v}$ |
-| Mass dynamics | $z_{n+1} = z_n - \tfrac{\alpha\,\Delta t}{2}(\sigma_n + \sigma_{n+1})$ | Log-mass decreases with integrated thrust magnitude $\sigma$ |
+| Velocity dynamics | $\mathbf{v}_{n+1} = \mathbf{v}_n + \tfrac{1}{2}(\mathbf{a}_n + \mathbf{a}_{n+1}) \Delta t, \quad \mathbf{a} = \mathbf{u} + \mathbf{g}$ | Trapezoidal link for $\mathbf{v}$ (thrust accel + gravity) |
+| Position dynamics | $\mathbf{r}_{n+1} = \mathbf{r}_n + \tfrac{1}{2}(\mathbf{v}_n + \mathbf{v}_{n+1}) \Delta t$ | Trapezoidal integral of $\mathbf{v}$ |
+| Mass dynamics | $z_{n+1} = z_n - \tfrac{\alpha \Delta t}{2}(\sigma_n + \sigma_{n+1})$ | Log-mass decreases with integrated thrust magnitude $\sigma$ |
 
 #### Inequality Constraints
 
@@ -243,10 +244,10 @@ dynamics that link one node to another.
 | --- | --- | --- | --- |
 | Thrust magnitude | $\lVert \mathbf{u}_n \rVert \le \sigma_n$ | SOC | Lossless convexification: slack $\sigma$ bounds the thrust acceleration |
 | Thrust pointing | $\hat{\mathbf{e}}_1^\top \mathbf{u}_n \ge \sigma_n \cos\theta$ | linear | Thrust stays within angle $\theta$ of vertical |
-| Thrust upper bound | $\sigma_n \le \mu_{2,n}\,(1 - (z_n - z_{0,n}))$ | linear | Throttle ceiling $\rho_2 e^{-z}$, linearized about $z_{0,n}$, $\ \mu_{2,n} = \rho_2 e^{-z_{0,n}}$ |
-| Thrust lower bound | $\sigma_n \ge \mu_{1,n}\,(1 - w + \tfrac{1}{2}w^2), \ w = z_n - z_{0,n}$ | SOC | Throttle floor $\rho_1 e^{-z}$, 2nd-order cut as a rotated cone (optional) |
+| Thrust upper bound | $\sigma_n \le \mu_{2,n} (1 - (z_n - z_{0,n}))$ | linear | Throttle ceiling $\rho_2 e^{-z}$, linearized about $z_{0,n}$, with $\mu_{2,n} = \rho_2 e^{-z_{0,n}}$ |
+| Thrust lower bound | $\sigma_n \ge \mu_{1,n} (1 - w + \tfrac{1}{2}w^2)$, where $w = z_n - z_{0,n}$ | SOC | Throttle floor $\rho_1 e^{-z}$, 2nd-order cut as a rotated cone (optional) |
 | Log-mass box | $z_{0,n} \le z_n \le z_{1,n}$ | linear | Mass stays in the reachable envelope, keeping the linearization tight |
-| Glideslope | $\lVert (\mathbf{r}_n - \mathbf{r}_f)_{yz} \rVert \le \cot\gamma_{gs}\,(r_{x,n} - r_{f,x})$ | SOC | Stay above the approach cone toward the pad |
+| Glideslope | $\lVert (\mathbf{r}_n - \mathbf{r}_f)_{yz} \rVert \le \cot\gamma_{gs} (r_{x,n} - r_{f,x})$ | SOC | Stay above the approach cone toward the pad |
 | Velocity cap | $\lVert \mathbf{v}_n \rVert \le V_\text{max}$ | SOC | Speed stays below $V_\text{max}$ |
 | Ground | $r_{x,n} \ge 0$ | linear | Altitude stays non-negative |
 | Landing-error epigraph | $\lVert \mathbf{r}_{N-1} - \mathbf{r}_f \rVert \le t$ | SOC | P3 only — bound the miss distance, minimized as the objective |
@@ -260,7 +261,7 @@ and `SocDims` — then reads the answer back. Here is what each piece is and whe
 it comes from.
 
 **The decision vector `x`.** The trajectory is sampled at `N` nodes
-($t_n = n\,\Delta t$) and every variable at every node becomes an unknown
+($t_n = n \Delta t$) and every variable at every node becomes an unknown
 (direct transcription). They are packed into one vector `x` of length
 $11N$ (or $11N+1$ for P3), blocked by type then node. The index helpers are
 the single source of truth for which slot is what:
@@ -348,7 +349,7 @@ log-mass rows — makes the solver numerically unhappy ("unreliable search
 direction"). So lengths are scaled by $L = \max(1000, \lVert \mathbf{r}_0 \rVert)$,
 time by $T = \sqrt{L/g}$ (hence velocity $L/T$, acceleration $L/T^2$); mass stays
 in kg since it only enters through $z = \ln m$ and the scale-invariant product
-$\alpha\,\rho\,t$. `Extract` un-scales everything on the way out.
+$\alpha \rho t$. `Extract` un-scales everything on the way out.
 
 ### The constraint matrices, spelled out
 
