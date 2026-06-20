@@ -3,9 +3,11 @@
 Guidance for [Kitten Space Agency](https://ahwoo.com/app/100000/kitten-space-agency)
 (KSA): guidance for powered ascent and powered descent, allowing accurate orbit targeting and pinpoint landing.
 
-## Unified Powered Flight Guidance https://youtu.be/oTMbm27fYgk
+## Unified Powered Flight Guidance
 
 ![UPFG Launch](docs/images/upfg-launch.png)
+
+https://youtu.be/oTMbm27fYgk
 
 The UPFG program is the program that was used to guide the space shuttle to it's desired orbit, as well as providing
 capability for other orbital manoeuvres. The implementation of mode 1 (standard ascent) is explained extremely well
@@ -15,15 +17,20 @@ This mod iterates by including mode 2 from the UPFG paper "Ascent to Reference t
 cutoff position to a desired point by modulating throttle. This can not only be used to target a reference trajectory on launch,
 but also to fly the vehicle to a precise landing point.
 
-## G-FOLD and Lossless Convexification https://youtu.be/3W0atVISp-s
+## G-FOLD and Lossless Convexification 
 
 ![G-FOLD Landing](docs/images/g-fold-traj.png)
 
-For the terminal landing, we use JPL's G-FOLD Algorithm developed by Blackmore et al. http://larsblackmore.com/iee_tcst13.pdf
+https://youtu.be/3W0atVISp-s
+
+For the terminal landing, we use JPL's G-FOLD Algorithm developed by Blackmore et al. http://larsblackmore.com/iee_tcst13.pdf. The discretisation and 
+implementation was guided by the great work by jonnyhyman https://github.com/jonnyhyman/G-FOLD-Python.
 
 This provides fuel optimal landing at a designated point, subject to constraints on min and max thrust, thrust pointing, glideslope and 
 maximum speed. This is achieved by formulating a second-order cone problem, and solving it  multiple times a second to
 provide a constantly updating solution which is able to cope with disturbances and modelling uncertainties.
+
+More information on the optimisation problem and maths can be found [here](https://github.com/cairn5/PoweredGuidance/gfold/README.md). 
 
 The thrust direction and magnitude
 are fed to KSA's autopilot as a euler angle command and a throttle. Therefore, the solver can fail when rapid changes of direction
