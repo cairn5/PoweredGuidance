@@ -20,13 +20,13 @@ $$
 \end{aligned}
 $$
 
-where $`x \in \mathbb{R}^n`$ is the decision vector and there are $`k`$ conic
-constraints. Each one confines $`(A_i x + b_i,\ c_i^\top x + d_i)`$ to a
-second-order cone $`\mathcal{Q} = \lbrace (y, \tau) : \lVert y \rVert_2 \le \tau \rbrace`$.
+where $x \in \mathbb{R}^n$ is the decision vector and there are $k$ conic
+constraints. Each one confines $(A_i x + b_i,\ c_i^\top x + d_i)$ to a
+second-order cone $\mathcal{Q} = \lbrace (y, \tau) : \lVert y \rVert_2 \le \tau \rbrace$.
 
 The problem is assembled and then solved by the ECOS solver; its output is the
-decision vector $`x`$, which stacks every per-node variable — position, velocity,
-thrust acceleration $`\mathbf{u}`$, log-mass $`z`$, and slack $`\sigma`$ — into one
+decision vector $x$, which stacks every per-node variable — position, velocity,
+thrust acceleration $\mathbf{u}$, log-mass $z$, and slack $\sigma$ — into one
 vector (see Notation).
 
 The sections below build up to that form: the convexity rules an SOCP must obey,
@@ -41,61 +41,61 @@ because its feasible set is convex and its objective convex — the interior-poi
 method can never get stuck in a false local minimum. An SOCP is the special case
 assembled from only these ingredients:
 
-- **Objective** — linear, $`f^\top x`$. (A convex objective is made linear by the
-  epigraph trick: $`\min  t`$ subject to $`f(x) \le t`$ — exactly how P3 handles its
+- **Objective** — linear, $f^\top x$. (A convex objective is made linear by the
+  epigraph trick: $\min\, t$ subject to $f(x) \le t$ — exactly how P3 handles its
   norm objective.)
-- **Equality constraints** — must be **affine**, $`Fx = g`$. A nonlinear equality is
+- **Equality constraints** — must be **affine**, $Fx = g$. A nonlinear equality is
   never allowed: it traces a curved surface, not a solid convex region. (This is
-  why the mass equality $`\dot m = -\alpha \lVert \mathbf{T}_c \rVert`$ had to be
+  why the mass equality $\dot m = -\alpha \lVert \mathbf{T}_c \rVert$ had to be
   relaxed — see Convexification.)
 - **Inequality constraints** — must be **convex**, and in an SOCP take exactly two
   shapes:
-  - linear, $`a^\top x \le b`$ (the nonnegative orthant $`\mathbb{R}_+`$);
-  - second-order cone, $`\lVert A x + b \rVert_2 \le c^\top x + d`$.
+  - linear, $a^\top x \le b$ (the nonnegative orthant $\mathbb{R}_+$);
+  - second-order cone, $\lVert A x + b \rVert_2 \le c^\top x + d$.
 
-**Rules of thumb.** Write every inequality as $`g(x) \le 0`$; it is a convex
-constraint **iff $`g`$ is convex**. Useful facts:
+**Rules of thumb.** Write every inequality as $g(x) \le 0$; it is a convex
+constraint **iff $g$ is convex**. Useful facts:
 
-- affine functions $`a^\top x + b`$ are convex *and* concave → fine on either side
+- affine functions $a^\top x + b$ are convex *and* concave → fine on either side
   of an inequality, and the only thing allowed in an equality;
-- norms $`\lVert \cdot \rVert`$, exponentials $`e^{az}`$, and squares are convex;
+- norms $\lVert \cdot \rVert$, exponentials $e^{az}$, and squares are convex;
 - a sum of convex functions, or the pointwise max of convex functions, is convex;
-- "convex $`\le`$ affine" is convex (e.g. $`\lVert \mathbf{u} \rVert \le \sigma`$, or
-  the throttle floor $`\rho_1 e^{-z} \le \sigma`$); the reverse "affine $`\le`$ convex"
-  is **non-convex** (e.g. the throttle ceiling $`\sigma \le \rho_2 e^{-z}`$, which is
+- "convex $\le$ affine" is convex (e.g. $\lVert \mathbf{u} \rVert \le \sigma$, or
+  the throttle floor $\rho_1 e^{-z} \le \sigma$); the reverse "affine $\le$ convex"
+  is **non-convex** (e.g. the throttle ceiling $\sigma \le \rho_2 e^{-z}$, which is
   why it must be linearized);
 - the intersection of convex sets is convex, so stacking more valid constraints
   keeps the whole problem convex.
 
 **Worked example — why the log-mass box is convex.** The box
-$`z_{0,n} \le z_n \le z_{1,n}`$ looks like it might inherit the exponential
-trouble, but $`z_{0,n}`$ and $`z_{1,n}`$ are precomputed *constants* (the min/max-mass
-envelope at node $`n`$), not functions of the variables. So it is just two affine
-bounds, $`z_n - z_{1,n} \le 0`$ and $`z_{0,n} - z_n \le 0`$ — two half-spaces whose
-intersection (a slab) is convex. No $`e^{-z}`$ appears in the box itself, which is
+$z_{0,n} \le z_n \le z_{1,n}$ looks like it might inherit the exponential
+trouble, but $z_{0,n}$ and $z_{1,n}$ are precomputed *constants* (the min/max-mass
+envelope at node $n$), not functions of the variables. So it is just two affine
+bounds, $z_n - z_{1,n} \le 0$ and $z_{0,n} - z_n \le 0$ — two half-spaces whose
+intersection (a slab) is convex. No $e^{-z}$ appears in the box itself, which is
 why it is plain *linear*, not a cone.
 
 ### Notation
 
 | Symbol | Meaning |
 | --- | --- |
-| $`n`$ | node index, $`0 \dots N-1`$ ($`N`$ nodes, step $`\Delta t = t_f/(N-1)`$) |
-| $`\mathbf{r} = (r_x, r_y, r_z)`$ | position; $`r_x`$ is the vertical (altitude) component |
-| $`(\cdot)_{yz}`$ | the horizontal $`(r_y, r_z)`$ components of a vector |
-| $`\mathbf{v}`$ | velocity |
-| $`\mathbf{x} = [\mathbf{r}; \mathbf{v}]`$ | per-node 6-D dynamical state (distinct from the stacked SOCP decision vector $`x`$ above) |
-| $`\mathbf{u} = \mathbf{T}_c / m`$ | thrust acceleration — the control |
-| $`z = \ln m`$ | log-mass (not a position component) |
-| $`\sigma`$ | thrust-magnitude slack, $`\lVert \mathbf{u} \rVert \le \sigma`$; equals $`\Gamma / m`$ |
-| $`t`$ | P3 landing-error epigraph variable |
-| $`\mathbf{g}`$ | constant gravity vector |
-| $`\alpha = 1/(I_{sp}  g_0)`$ | mass-flow (fuel-consumption) rate |
-| $`\rho_1, \rho_2`$ | min / max thrust (force) bounds |
-| $`\Gamma`$ | thrust-magnitude slack in force units (paper's variable; $`\sigma = \Gamma/m`$) |
-| $`\theta`$ | max thrust pointing angle from vertical |
-| $`\gamma_{gs}`$ | glideslope angle |
-| $`V_\text{max}`$ | max speed |
-| $`\mathbf{r}_f, \mathbf{v}_f`$ | target landing position / velocity |
+| $n$ | node index, $0 \dots N-1$ ($N$ nodes, step $\Delta t = t_f/(N-1)$) |
+| $\mathbf{r} = (r_x, r_y, r_z)$ | position; $r_x$ is the vertical (altitude) component |
+| $(\cdot)_{yz}$ | the horizontal $(r_y, r_z)$ components of a vector |
+| $\mathbf{v}$ | velocity |
+| $\mathbf{x} = [\mathbf{r}; \mathbf{v}]$ | per-node 6-D dynamical state (distinct from the stacked SOCP decision vector $x$ above) |
+| $\mathbf{u} = \mathbf{T}_c / m$ | thrust acceleration — the control |
+| $z = \ln m$ | log-mass (not a position component) |
+| $\sigma$ | thrust-magnitude slack, $\lVert \mathbf{u} \rVert \le \sigma$; equals $\Gamma / m$ |
+| $t$ | P3 landing-error epigraph variable |
+| $\mathbf{g}$ | constant gravity vector |
+| $\alpha = 1/(I_{sp}\, g_0)$ | mass-flow (fuel-consumption) rate |
+| $\rho_1, \rho_2$ | min / max thrust (force) bounds |
+| $\Gamma$ | thrust-magnitude slack in force units (paper's variable; $\sigma = \Gamma/m$) |
+| $\theta$ | max thrust pointing angle from vertical |
+| $\gamma_{gs}$ | glideslope angle |
+| $V_\text{max}$ | max speed |
+| $\mathbf{r}_f, \mathbf{v}_f$ | target landing position / velocity |
 
 ### State and dynamics
 
@@ -108,10 +108,10 @@ $$
 $$
 
 Its derivative is the translational equation of motion, with thrust
-acceleration $`\mathbf{T}_c / m`$ and gravity $`\mathbf{g}`$ as inputs:
+acceleration $\mathbf{T}_c / m$ and gravity $\mathbf{g}$ as inputs:
 
 $$
-\dot{\mathbf{x}} = A(\omega) \mathbf{x} + B ( \mathbf{g} + \frac{\mathbf{T}_c}{m} )
+\dot{\mathbf{x}} = A(\omega) \mathbf{x} + B \left( \mathbf{g} + \frac{\mathbf{T}_c}{m} \right)
 $$
 
 $$
@@ -120,75 +120,74 @@ A(\omega) = \begin{bmatrix} 0 & I \\ -S(\omega)^2 & -2 S(\omega) \end{bmatrix},
 B = \begin{bmatrix} 0 \\ I \end{bmatrix}
 $$
 
-Here $`S(\omega)`$ is the skew-symmetric cross-product matrix of the planet's
-angular velocity $`\omega`$, so $`-S(\omega)^2 \mathbf{r}`$ is the centripetal and
-$`-2 S(\omega) \mathbf{v}`$ the Coriolis term. This implementation takes
-$`\omega = 0`$ (non-rotating frame), reducing $`A`$ to the double integrator
-
-$$A(0) = \begin{bmatrix} 0 & I \\ 0 & 0 \end{bmatrix}.$$
+Here $S(\omega)$ is the skew-symmetric cross-product matrix of the planet's
+angular velocity $\omega$, so $-S(\omega)^2 \mathbf{r}$ is the centripetal and
+$-2 S(\omega) \mathbf{v}$ the Coriolis term. This implementation takes
+$\omega = 0$ (non-rotating frame), reducing $A$ to the double integrator
+$\left[ \begin{smallmatrix} 0 & I \\ 0 & 0 \end{smallmatrix} \right]$.
 
 ### Convexification
 
-In physical variables $`(\mathbf{r}, \mathbf{v}, m, \mathbf{T}_c)`$ the problem is
-**non-convex** on three counts: the acceleration $`\mathbf{T}_c / m`$ is bilinear,
-the mass depletion $`\dot m = -\alpha \lVert \mathbf{T}_c \rVert`$ is nonlinear,
-and the engine's lower throttle limit $`\lVert \mathbf{T}_c \rVert \ge \rho_1 > 0`$
-carves out a non-convex set. Two changes of variable ($`\mathbf{u}`$, $`z`$), one
-slack relaxation ($`\sigma`$), and one epigraph variable ($`t`$) turn it into the
+In physical variables $(\mathbf{r}, \mathbf{v}, m, \mathbf{T}_c)$ the problem is
+**non-convex** on three counts: the acceleration $\mathbf{T}_c / m$ is bilinear,
+the mass depletion $\dot m = -\alpha \lVert \mathbf{T}_c \rVert$ is nonlinear,
+and the engine's lower throttle limit $\lVert \mathbf{T}_c \rVert \ge \rho_1 > 0$
+carves out a non-convex set. Two changes of variable ($\mathbf{u}$, $z$), one
+slack relaxation ($\sigma$), and one epigraph variable ($t$) turn it into the
 SOCP standard form above. (The mass/discretization part is from Açıkmeşe & Ploen
 2007; the lossless control relaxation from Açıkmeşe, Carson & Blackmore 2013 —
 see references.)
 
 | New variable | Definition | Removes | Replaces |
 | --- | --- | --- | --- |
-| $`\mathbf{u}`$ | $`\mathbf{T}_c / m`$ (thrust acceleration) | $`\mathbf{T}_c/m`$ division → dynamics become $`\dot{\mathbf{v}} = \mathbf{u} + \mathbf{g}`$ | thrust force |
-| $`z`$ | $`\ln m`$ (log-mass) | nonlinear mass ODE → $`\dot z = -\alpha \sigma`$ | mass |
-| $`\sigma`$ | slack with $`\lVert \mathbf{u} \rVert \le \sigma`$ | non-convex thrust lower bound $`\lVert \mathbf{T}_c \rVert \ge \rho_1`$ (handled *losslessly*) | $`\lVert \mathbf{u} \rVert`$ |
-| $`t`$ | epigraph with $`\lVert \mathbf{r}_{N-1} - \mathbf{r}_f \rVert \le t`$ | norm in the P3 objective | — (P3 only) |
+| $\mathbf{u}$ | $\mathbf{T}_c / m$ (thrust acceleration) | $\mathbf{T}_c/m$ division → dynamics become $\dot{\mathbf{v}} = \mathbf{u} + \mathbf{g}$ | thrust force |
+| $z$ | $\ln m$ (log-mass) | nonlinear mass ODE → $\dot z = -\alpha \sigma$ | mass |
+| $\sigma$ | slack with $\lVert \mathbf{u} \rVert \le \sigma$ | non-convex thrust lower bound $\lVert \mathbf{T}_c \rVert \ge \rho_1$ (handled *losslessly*) | $\lVert \mathbf{u} \rVert$ |
+| $t$ | epigraph with $\lVert \mathbf{r}_{N-1} - \mathbf{r}_f \rVert \le t$ | norm in the P3 objective | — (P3 only) |
 
 **Lossless convexification.** The thrust magnitude is relaxed from
-$`\lVert \mathbf{u} \rVert = \sigma`$ to the cone $`\lVert \mathbf{u} \rVert \le \sigma`$.
-The slack $`\sigma`$ here is the paper's $`\Gamma`$ normalized by mass,
-$`\sigma = \Gamma / m`$ — it carries the magnitude into the (now linear) mass
+$\lVert \mathbf{u} \rVert = \sigma$ to the cone $\lVert \mathbf{u} \rVert \le \sigma$.
+The slack $\sigma$ here is the paper's $\Gamma$ normalized by mass,
+$\sigma = \Gamma / m$ — it carries the magnitude into the (now linear) mass
 dynamics and throttle bounds. The relaxation is provably *tight* at the optimum
-($`\lVert \mathbf{u} \rVert = \sigma`$), so nothing is lost.
+($\lVert \mathbf{u} \rVert = \sigma$), so nothing is lost.
 
 **Taylor-linearized throttle bounds.** Dividing the throttle limits by mass
-gives $`\rho_1 e^{-z} \le \sigma \le \rho_2 e^{-z}`$. The upper bound is
-"$`\sigma \le`$ (convex)", a non-convex region, so $`e^{-z}`$ is linearized about a
-per-node point $`z_{0,n}`$:
+gives $\rho_1 e^{-z} \le \sigma \le \rho_2 e^{-z}$. The upper bound is
+"$\sigma \le$ (convex)", a non-convex region, so $e^{-z}$ is linearized about a
+per-node point $z_{0,n}$:
 
 $$
-\sigma_n \le \mu_{2,n} (1 - (z_n - z_{0,n})), \qquad \mu_{2,n} = \rho_2 e^{-z_{0,n}} .
+\sigma_n \le \mu_{2,n}\,(1 - (z_n - z_{0,n})), \qquad \mu_{2,n} = \rho_2 e^{-z_{0,n}} .
 $$
 
-The expansion point is the **minimum possible mass at node $`n`$** — the lightest
+The expansion point is the **minimum possible mass at node $n$** — the lightest
 the vehicle can be is full-throttle burn since launch:
 
 $$
-z_{0,n} = \ln( m_\text{wet} - \alpha \rho_2   t_n ), \qquad t_n = n \Delta t .
+z_{0,n} = \ln\!\left( m_\text{wet} - \alpha \rho_2 \, t_n \right), \qquad t_n = n\,\Delta t .
 $$
 
-$`e^{-z}`$ is convex (its second derivative $`\tfrac{d^2}{dz^2} e^{-z} = e^{-z} > 0`$
+$e^{-z}$ is convex (its second derivative $\tfrac{d^2}{dz^2} e^{-z} = e^{-z} > 0$
 everywhere), so its tangent lies below the curve and the affine bound is exact at
-$`z_{0,n}`$ and conservative above it (it never permits an infeasible throttle). The
-box $`z_{0,n} \le z_n \le z_{1,n}`$ keeps $`z_n`$ near $`z_{0,n}`$ so the linearization
+$z_{0,n}$ and conservative above it (it never permits an infeasible throttle). The
+box $z_{0,n} \le z_n \le z_{1,n}$ keeps $z_n$ near $z_{0,n}$ so the linearization
 stays tight.
 
 **Upper vs lower bound — expanded for different reasons.** The two throttle bounds
 are not the same kind of constraint:
 
-- **Upper** $`\sigma \le \rho_2 e^{-z}`$ is the region *below* a convex curve (a
+- **Upper** $\sigma \le \rho_2 e^{-z}$ is the region *below* a convex curve (a
   hypograph) — **non-convex**. The first-order linearization replaces it with an
   affine constraint to *make it convex*.
-- **Lower** $`\sigma \ge \rho_1 e^{-z}`$ is the region *above* a convex curve (an
+- **Lower** $\sigma \ge \rho_1 e^{-z}$ is the region *above* a convex curve (an
   epigraph) — already **convex**, so it needs no fixing for convexity. It is
   expanded only because it is an *exponential-cone* shape, and ECOS handles only
   linear and second-order cones. A second-order Taylor cut,
-  $`\sigma \ge \mu_{1,n}(1 - w + \tfrac{1}{2} w^2)`$ with $`w = z - z_{0,n} \ge 0`$,
+  $\sigma \ge \mu_{1,n}(1 - w + \tfrac{1}{2} w^2)$ with $w = z - z_{0,n} \ge 0$,
   turns it into a quadratic — a rotated second-order cone ECOS *can* take.
-  Truncating the alternating series after the $`+\tfrac{1}{2}w^2`$ term
-  over-estimates $`e^{-w}`$, so the cut stays conservative (never under-thrusts).
+  Truncating the alternating series after the $+\tfrac{1}{2}w^2$ term
+  over-estimates $e^{-w}$, so the cut stays conservative (never under-thrusts).
   This bound is optional (`EnforceLowerThrust`).
 
 This is what trades the *unfixable* non-convexity in the dynamics for a *mild,
@@ -197,9 +196,9 @@ is preferred even though it (unlike the force form) needs the Taylor step.
 
 ### G-FOLD Problem Formulation
 
-Time of flight $`t_f`$ is **not** a decision variable in the convex program: each
-solve fixes $`t_f`$ (so $`\Delta t = t_f/(N-1)`$ is constant), and an outer
-golden-section search picks the best $`t_f`$. For a fixed $`t_f`$ the code solves one
+Time of flight $t_f$ is **not** a decision variable in the convex program: each
+solve fixes $t_f$ (so $\Delta t = t_f/(N-1)$ is constant), and an outer
+golden-section search picks the best $t_f$. For a fixed $t_f$ the code solves one
 of two problems:
 
 $$
@@ -210,13 +209,13 @@ $$
 \textbf{P4 (min fuel):} \quad \max \; z_{N-1}
 $$
 
-The classic G-FOLD objective is written $`\min \int_0^{t_f} \Gamma  dt`$ (minimize
+The classic G-FOLD objective is written $\min \int_0^{t_f} \Gamma\, dt$ (minimize
 integrated thrust = fuel). The code does **not** optimize that integral directly;
-it maximizes the final log-mass $`z_{N-1}`$, which is **equivalent**: fuel burned is
-$`m_\text{wet} - e^{z_{N-1}}`$, so maximizing $`z_{N-1}`$ minimizes fuel, and fuel
-$`= \alpha \int_0^{t_f} \Gamma  dt`$. P3's norm objective is made linear with the
-epigraph variable $`t`$ ($`\lVert \mathbf{r}_{N-1} - \mathbf{r}_f \rVert \le t`$,
-minimize $`t`$).
+it maximizes the final log-mass $z_{N-1}$, which is **equivalent**: fuel burned is
+$m_\text{wet} - e^{z_{N-1}}$, so maximizing $z_{N-1}$ minimizes fuel, and fuel
+$= \alpha \int_0^{t_f} \Gamma\, dt$. P3's norm objective is made linear with the
+epigraph variable $t$ ($\lVert \mathbf{r}_{N-1} - \mathbf{r}_f \rVert \le t$,
+minimize $t$).
 
 Subject to equality and inequality constraints.
 
@@ -227,30 +226,30 @@ dynamics that link one node to another.
 
 | Constraint | Expression | Description |
 | --- | --- | --- |
-| Initial position | $`\mathbf{r}_0 = \mathbf{r}_\text{init}`$ | Trajectory starts at the measured position |
-| Initial velocity | $`\mathbf{v}_0 = \mathbf{v}_\text{init}`$ | Trajectory starts at the measured velocity |
-| Terminal velocity | $`\mathbf{v}_{N-1} = \mathbf{v}_f`$ | Arrive at the target touchdown velocity $`\mathbf{v}_f`$ |
-| Initial mass | $`z_0 = \ln m_\text{wet}`$ | Log-mass begins at the wet mass |
-| Terminal position | $`r_{x,N-1} = r_{f,x}`$ (P3); $`\quad \mathbf{r}_{N-1} = \mathbf{r}_f`$ (P4) | P3 pins altitude only (floats the landing point); P4 pins the full point |
-| Endpoint thrust direction | $`\mathbf{u}_0 = \sigma_0 \hat{\mathbf{e}}, \quad \mathbf{u}_{N-1} = \sigma_{N-1} \hat{\mathbf{e}}, \quad \hat{\mathbf{e}} = (1,0,0)`$ | Thrust vertical at the endpoints (initial dropped in free-initial-thrust mode) |
-| Terminal thrust slack | $`\sigma_{N-1} = 0`$ | Thrust magnitude goes to zero at touchdown |
-| Velocity dynamics | $`\mathbf{v}_{n+1} = \mathbf{v}_n + \tfrac{1}{2}(\mathbf{a}_n + \mathbf{a}_{n+1}) \Delta t, \quad \mathbf{a} = \mathbf{u} + \mathbf{g}`$ | Trapezoidal link for $`\mathbf{v}`$ (thrust accel + gravity) |
-| Position dynamics | $`\mathbf{r}_{n+1} = \mathbf{r}_n + \tfrac{1}{2}(\mathbf{v}_n + \mathbf{v}_{n+1}) \Delta t`$ | Trapezoidal integral of $`\mathbf{v}`$ |
-| Mass dynamics | $`z_{n+1} = z_n - \tfrac{\alpha \Delta t}{2}(\sigma_n + \sigma_{n+1})`$ | Log-mass decreases with integrated thrust magnitude $`\sigma`$ |
+| Initial position | $\mathbf{r}_0 = \mathbf{r}_\text{init}$ | Trajectory starts at the measured position |
+| Initial velocity | $\mathbf{v}_0 = \mathbf{v}_\text{init}$ | Trajectory starts at the measured velocity |
+| Terminal velocity | $\mathbf{v}_{N-1} = \mathbf{v}_f$ | Arrive at the target touchdown velocity $\mathbf{v}_f$ |
+| Initial mass | $z_0 = \ln m_\text{wet}$ | Log-mass begins at the wet mass |
+| Terminal position | $r_{x,N-1} = r_{f,x}$ (P3); $\quad \mathbf{r}_{N-1} = \mathbf{r}_f$ (P4) | P3 pins altitude only (floats the landing point); P4 pins the full point |
+| Endpoint thrust direction | $\mathbf{u}_0 = \sigma_0\,\hat{\mathbf{e}}, \quad \mathbf{u}_{N-1} = \sigma_{N-1}\,\hat{\mathbf{e}}, \quad \hat{\mathbf{e}} = (1,0,0)$ | Thrust vertical at the endpoints (initial dropped in free-initial-thrust mode) |
+| Terminal thrust slack | $\sigma_{N-1} = 0$ | Thrust magnitude goes to zero at touchdown |
+| Velocity dynamics | $\mathbf{v}_{n+1} = \mathbf{v}_n + \tfrac{1}{2}(\mathbf{a}_n + \mathbf{a}_{n+1})\,\Delta t, \quad \mathbf{a} = \mathbf{u} + \mathbf{g}$ | Trapezoidal link for $\mathbf{v}$ (thrust accel + gravity) |
+| Position dynamics | $\mathbf{r}_{n+1} = \mathbf{r}_n + \tfrac{1}{2}(\mathbf{v}_n + \mathbf{v}_{n+1})\,\Delta t$ | Trapezoidal integral of $\mathbf{v}$ |
+| Mass dynamics | $z_{n+1} = z_n - \tfrac{\alpha\,\Delta t}{2}(\sigma_n + \sigma_{n+1})$ | Log-mass decreases with integrated thrust magnitude $\sigma$ |
 
 #### Inequality Constraints
 
 | Constraint | Expression | Cone | Description |
 | --- | --- | --- | --- |
-| Thrust magnitude | $`\lVert \mathbf{u}_n \rVert \le \sigma_n`$ | SOC | Lossless convexification: slack $`\sigma`$ bounds the thrust acceleration |
-| Thrust pointing | $`\hat{\mathbf{e}}_1^\top \mathbf{u}_n \ge \sigma_n \cos\theta`$ | linear | Thrust stays within angle $`\theta`$ of vertical |
-| Thrust upper bound | $`\sigma_n \le \mu_{2,n} (1 - (z_n - z_{0,n}))`$ | linear | Throttle ceiling $`\rho_2 e^{-z}`$, linearized about $`z_{0,n}`$, with $`\mu_{2,n} = \rho_2 e^{-z_{0,n}}`$ |
-| Thrust lower bound | $`\sigma_n \ge \mu_{1,n} (1 - w + \tfrac{1}{2}w^2)`$, where $`w = z_n - z_{0,n}`$ | SOC | Throttle floor $`\rho_1 e^{-z}`$, 2nd-order cut as a rotated cone (optional) |
-| Log-mass box | $`z_{0,n} \le z_n \le z_{1,n}`$ | linear | Mass stays in the reachable envelope, keeping the linearization tight |
-| Glideslope | $`\lVert (\mathbf{r}_n - \mathbf{r}_f)_{yz} \rVert \le \cot\gamma_{gs} (r_{x,n} - r_{f,x})`$ | SOC | Stay above the approach cone toward the pad |
-| Velocity cap | $`\lVert \mathbf{v}_n \rVert \le V_\text{max}`$ | SOC | Speed stays below $`V_\text{max}`$ |
-| Ground | $`r_{x,n} \ge 0`$ | linear | Altitude stays non-negative |
-| Landing-error epigraph | $`\lVert \mathbf{r}_{N-1} - \mathbf{r}_f \rVert \le t`$ | SOC | P3 only — bound the miss distance, minimized as the objective |
+| Thrust magnitude | $\lVert \mathbf{u}_n \rVert \le \sigma_n$ | SOC | Lossless convexification: slack $\sigma$ bounds the thrust acceleration |
+| Thrust pointing | $\hat{\mathbf{e}}_1^\top \mathbf{u}_n \ge \sigma_n \cos\theta$ | linear | Thrust stays within angle $\theta$ of vertical |
+| Thrust upper bound | $\sigma_n \le \mu_{2,n}\,(1 - (z_n - z_{0,n}))$ | linear | Throttle ceiling $\rho_2 e^{-z}$, linearized about $z_{0,n}$, $\ \mu_{2,n} = \rho_2 e^{-z_{0,n}}$ |
+| Thrust lower bound | $\sigma_n \ge \mu_{1,n}\,(1 - w + \tfrac{1}{2}w^2), \ w = z_n - z_{0,n}$ | SOC | Throttle floor $\rho_1 e^{-z}$, 2nd-order cut as a rotated cone (optional) |
+| Log-mass box | $z_{0,n} \le z_n \le z_{1,n}$ | linear | Mass stays in the reachable envelope, keeping the linearization tight |
+| Glideslope | $\lVert (\mathbf{r}_n - \mathbf{r}_f)_{yz} \rVert \le \cot\gamma_{gs}\,(r_{x,n} - r_{f,x})$ | SOC | Stay above the approach cone toward the pad |
+| Velocity cap | $\lVert \mathbf{v}_n \rVert \le V_\text{max}$ | SOC | Speed stays below $V_\text{max}$ |
+| Ground | $r_{x,n} \ge 0$ | linear | Altitude stays non-negative |
+| Landing-error epigraph | $\lVert \mathbf{r}_{N-1} - \mathbf{r}_f \rVert \le t$ | SOC | P3 only — bound the miss distance, minimized as the objective |
 
 ### What GfoldPlanner hands the solver
 
@@ -261,18 +260,18 @@ and `SocDims` — then reads the answer back. Here is what each piece is and whe
 it comes from.
 
 **The decision vector `x`.** The trajectory is sampled at `N` nodes
-($`t_n = n \Delta t`$) and every variable at every node becomes an unknown
+($t_n = n\,\Delta t$) and every variable at every node becomes an unknown
 (direct transcription). They are packed into one vector `x` of length
-$`11N`$ (or $`11N+1`$ for P3), blocked by type then node. The index helpers are
+$11N$ (or $11N+1$ for P3), blocked by type then node. The index helpers are
 the single source of truth for which slot is what:
 
 | Block | Index helper | Size | Contents |
 | --- | --- | --- | --- |
-| state | `IX(n,i) = 6n + i` | $`6N`$ | position ($`i=0,1,2`$), velocity ($`i=3,4,5`$) |
-| control | `IU(n,i) = 6N + 3n + i` | $`3N`$ | thrust acceleration $`\mathbf{u}`$ |
-| log-mass | `IZ(n) = 9N + n` | $`N`$ | $`z`$ |
-| slack | `IS(n) = 10N + n` | $`N`$ | $`\sigma`$ |
-| epigraph | `IT = 11N` | $`1`$ | $`t`$ (P3 only) |
+| state | `IX(n,i) = 6n + i` | $6N$ | position ($i=0,1,2$), velocity ($i=3,4,5$) |
+| control | `IU(n,i) = 6N + 3n + i` | $3N$ | thrust acceleration $\mathbf{u}$ |
+| log-mass | `IZ(n) = 9N + n` | $N$ | $z$ |
+| slack | `IS(n) = 10N + n` | $N$ | $\sigma$ |
+| epigraph | `IT = 11N` | $1$ | $t$ (P3 only) |
 
 **The objective `c`.** Same length as `x`, all zeros except one entry:
 - P4 (min fuel): `c[IZ(N-1)] = -1` — maximize final log-mass.
@@ -284,7 +283,7 @@ variables that appear in that equation are nonzero. Each entry in the
 equality-constraints table contributes its rows: a *vector* condition expands to
 three (one per x/y/z component), the dynamics links couple node `n` to `n+1`.
 
-For example, "initial position $`\mathbf{r}_0 = \mathbf{r}_\text{init}`$" is three
+For example, "initial position $\mathbf{r}_0 = \mathbf{r}_\text{init}$" is three
 rows; the first (`GfoldPlanner.cs:245`) is
 
 ```csharp
@@ -294,13 +293,13 @@ A.Add(row, IX(0, 0), 1); b[row] = r0[0];   // 1 * x[IX(0,0)] = r0[0]
 — a single `1` in the column for the initial-altitude slot, the measured value in
 `b`.
 
-**The inequalities `G, h` and cone sizes.** These use $`G x + s = h`$, i.e.
-$`s = h - G x`$, with `s` required to stay in its cone (`≥ 0` for linear,
-$`s_0 \ge \lVert(s_1,\dots)\rVert`$ for a cone). So for each row: **`h` holds the
+**The inequalities `G, h` and cone sizes.** These use $G x + s = h$, i.e.
+$s = h - G x$, with `s` required to stay in its cone (`≥ 0` for linear,
+$s_0 \ge \lVert(s_1,\dots)\rVert$ for a cone). So for each row: **`h` holds the
 constant part** of the quantity you want `s` to equal, and **`G` holds the
 *negated* coefficients** of the variables (because of the minus sign).
 
-*Linear example — ground, $`r_{x,n} \ge 0`$.* Altitude is the variable
+*Linear example — ground, $r_{x,n} \ge 0$.* Altitude is the variable
 `x[IX(n,0)]`; we want the slack to be that altitude (`s ≥ 0`). Constant part is
 `0`, the coefficient `+1` negates to `-1` (`GfoldPlanner.cs:363`):
 
@@ -308,9 +307,9 @@ constant part** of the quantity you want `s` to equal, and **`G` holds the
 G.Add(row, IX(n, 0), -1); h[row] = 0;      // s = 0 - (-1)*r_x = r_x >= 0
 ```
 
-*Cone example — velocity cap, $`\lVert \mathbf{v}_n \rVert \le V_\text{max}`$.* A
+*Cone example — velocity cap, $\lVert \mathbf{v}_n \rVert \le V_\text{max}$.* A
 second-order cone of size 4: we want `s = (V_max, v_x, v_y, v_z)`, so that
-$`s_0 \ge \lVert(s_1,s_2,s_3)\rVert`$ reads $`V_\text{max} \ge \lVert\mathbf{v}_n\rVert`$.
+$s_0 \ge \lVert(s_1,s_2,s_3)\rVert$ reads $V_\text{max} \ge \lVert\mathbf{v}_n\rVert$.
 Row 0 is the constant bound (no variables); rows 1–3 pull in the velocity
 components (`GfoldPlanner.cs:384`):
 
@@ -344,12 +343,12 @@ pulls each block out by the same indices and converts back to physical quantitie
 (`m = e^z`, and un-scaling — see below).
 
 **Nondimensionalization.** One thing `Solve` does *before* assembly: scale the
-problem to $`O(1)`$. The raw SI problem — metre-scale positions against unit-scale
+problem to $O(1)$. The raw SI problem — metre-scale positions against unit-scale
 log-mass rows — makes the solver numerically unhappy ("unreliable search
-direction"). So lengths are scaled by $`L = \max(1000, \lVert \mathbf{r}_0 \rVert)`$,
-time by $`T = \sqrt{L/g}`$ (hence velocity $`L/T`$, acceleration $`L/T^2`$); mass stays
-in kg since it only enters through $`z = \ln m`$ and the scale-invariant product
-$`\alpha \rho t`$. `Extract` un-scales everything on the way out.
+direction"). So lengths are scaled by $L = \max(1000, \lVert \mathbf{r}_0 \rVert)$,
+time by $T = \sqrt{L/g}$ (hence velocity $L/T$, acceleration $L/T^2$); mass stays
+in kg since it only enters through $z = \ln m$ and the scale-invariant product
+$\alpha\,\rho\,t$. `Extract` un-scales everything on the way out.
 
 ### The constraint matrices, spelled out
 
@@ -357,7 +356,7 @@ The matrices are `11N` columns wide, so rather than a literal grid, each row gro
 is listed as a *stencil*: the columns it touches, the coefficient on each, and the
 right-hand side. With the column ordering below, this fully determines `A`, `b`,
 `G`, `h`. Shown for the **reference configuration** (no relaxations, throttle
-floor off); $`i \in \{0,1,2\}`$ is the axis, $`n`$ the node, $`\Delta t`$ the step.
+floor off); $i \in \{0,1,2\}$ is the axis, $n$ the node, $\Delta t$ the step.
 
 **Column ordering of `x`** (length `11N`, or `11N+1` for P3):
 
