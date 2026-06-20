@@ -3,7 +3,7 @@
 Guidance for [Kitten Space Agency](https://ahwoo.com/app/100000/kitten-space-agency)
 (KSA): guidance for powered ascent and powered descent, allowing accurate orbit targeting and pinpoint landing.
 
-## Unified Powered Flight Guidance
+## Unified Powered Flight Guidance https://youtu.be/oTMbm27fYgk
 
 ![UPFG Launch](docs/images/upfg-launch.png)
 
@@ -13,11 +13,9 @@ by the wonderful PEGAS mod for KSP https://github.com/Noiredd/PEGAS-MATLAB/blob/
 
 This mod iterates by including mode 2 from the UPFG paper "Ascent to Reference trajectory", which allows us to drive the 
 cutoff position to a desired point by modulating throttle. This can not only be used to target a reference trajectory on launch,
- but also to fly the vehicle to a precise landing point.
+but also to fly the vehicle to a precise landing point.
 
-https://youtu.be/oTMbm27fYgk
-
-## G-FOLD and Lossless Convexification
+## G-FOLD and Lossless Convexification https://youtu.be/3W0atVISp-s
 
 ![G-FOLD Landing](docs/images/g-fold-traj.png)
 
